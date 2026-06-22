@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Floranya — Admin</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400;500;600;700&family=Playfair+Display:wght@400;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login-screen" class="admin-login-wrap">
+  <div class="admin-login-box">
+    <img src="/logo.png" class="admin-login-logo" alt="Floranya" onerror="this.style.display='none'">
+    <h2>Floranya Admin</h2>
+    <p>Enter your password to manage the menu</p>
+    <input type="password" id="password-input" class="admin-input" placeholder="Admin password"
+           onkeydown="if(event.key==='Enter') login()">
+    <button class="btn-primary" onclick="login()">Sign In</button>
+    <p class="error-msg" id="login-error"></p>
+  </div>
+</div>
+
+<!-- ADMIN PANEL -->
+<div id="admin-screen" style="display:none;">
+  <div class="admin-layout">
+
+    <!-- Sidebar (desktop) -->
+    <aside class="admin-sidebar">
+      <div class="admin-brand">
+        <img src="/logo.png" alt="Floranya" onerror="this.style.display='none'">
+        <div>
+          <div class="admin-brand-text">Floranya</div>
+          <div class="admin-brand-sub">Admin Panel</div>
+        </div>
+      </div>
+      <nav class="admin-nav" id="admin-nav">
+        <button class="admin-nav-item active" data-tab="slideshow" onclick="switchTab('slideshow', this)">
+          <span class="nav-icon" id="nav-icon-slideshow">🎬</span> Hero Video
+        </button>
+        <button class="admin-nav-item" data-tab="featured" onclick="switchTab('featured', this)">
+          <span class="nav-icon" id="nav-icon-featured">⭐</span> Featured
+        </button>
+        <button class="admin-nav-item" data-tab="categories" onclick="switchTab('categories', this)">
+          <span class="nav-icon" id="nav-icon-categories">📂</span> Categories
+        </button>
+        <button class="admin-nav-item" data-tab="items" onclick="switchTab('items', this)">
+          <span class="nav-icon" id="nav-icon-items">🧾</span> Items
+        </button>
+        <button class="admin-nav-item" data-tab="comments" onclick="switchTab('comments', this)">
+          <span class="nav-icon" id="nav-icon-comments">💬</span> Comments
+          <span class="admin-nav-badge" id="pending-badge" style="display:none;"></span>
+        </button>
+        <button class="admin-nav-item" data-tab="design" onclick="switchTab('design', this)">
+          <span class="nav-icon" id="nav-icon-design">🎨</span> Design
+        </button>
+      </nav>
+      <div class="admin-nav-footer">
+        <a href="/index.html" target="_blank">↗ View Live Menu</a>
+      </div>
+    </aside>
+
+    <!-- Main -->
+    <div style="flex:1; display:flex; flex-direction:column; min-height:100vh;">
+
+      <!-- Mobile nav -->
+      <div class="admin-mobile-nav" id="admin-mobile-nav">
+        <button class="admin-mobile-nav-item active" data-tab="slideshow" onclick="switchTab('slideshow', this)">🎬 Hero Video</button>
+        <button class="admin-mobile-nav-item" data-tab="featured" onclick="switchTab('featured', this)">⭐ Featured</button>
+        <button class="admin-mobile-nav-item" data-tab="categories" onclick="switchTab('categories', this)">📂 Categories</button>
+        <button class="admin-mobile-nav-item" data-tab="items" onclick="switchTab('items', this)">🧾 Items</button>
+        <button class="admin-mobile-nav-item" data-tab="comments" onclick="switchTab('comments', this)">💬 Comments</button>
+        <button class="admin-mobile-nav-item" data-tab="design" onclick="switchTab('design', this)">🎨 Design</button>
+      </div>
+
+      <div class="admin-topbar">
+        <h1 id="topbar-title">Hero Video</h1>
+        <a href="/index.html" target="_blank" style="font-size:.82rem; color:var(--ink-soft);">↗ Live menu</a>
+      </div>
+
+      <div class="admin-main">
+        <div class="admin-content">
+
+          <!-- TAB: HERO VIDEO -->
+          <div class="admin-tab active" id="tab-slideshow">
+            <div class="a-card">
+              <div class="a-card-title">Hero Video <span style="font-weight:400;color:var(--ink-soft);font-size:.8rem;">Displayed at 21:9 cinematic ratio below the header</span></div>
+              <div id="hero-video-preview"></div>
+              <div style="margin-top:18px;">
+                <label class="a-label">Upload Video (MP4 or WebM recommended, max 300 MB)</label>
+                <input type="file" id="hero-video-file" accept="video/mp4,video/webm,video/quicktime" class="a-input">
+                <button class="btn-sm" style="margin-top:10px;" onclick="uploadHeroVideo()">Upload &amp; Set</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- TAB: FEATURED -->
+          <div class="admin-tab" id="tab-featured">
+            <div class="a-card">
+              <div class="a-card-title">Featured Items Mode</div>
+              <label class="a-toggle">
+                <input type="checkbox" id="featured-auto-toggle" onchange="saveFeaturedMode()">
+                <div class="toggle-track"></div>
+                <span>Auto (show most liked items)</span>
+              </label>
+              <div class="featured-mode-panel" id="featured-manual-panel" style="display:none;">
+                <p style="font-size:.85rem;color:var(--ink-soft);margin-bottom:10px;">
+                  Select which items appear in the featured section (up to 10):
+                </p>
+                <div class="featured-manual-list" id="featured-manual-list"></div>
+                <button class="btn-sm" style="margin-top:14px;" onclick="saveFeaturedItems()">Save Selection</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- TAB: CATEGORIES -->
+          <div class="admin-tab" id="tab-categories">
+            <div class="a-card">
+              <div class="a-card-title">Add Category</div>
+              <div class="form-grid form-grid-2">
+                <div>
+                  <label class="a-label">Name (English)</label>
+                  <input type="text" id="new-cat-en" class="a-input" placeholder="e.g. Hot Drinks">
+                </div>
+                <div>
+                  <label class="a-label">Name (Arabic)</label>
+                  <input type="text" id="new-cat-ar" class="a-input" dir="rtl" placeholder="مثال: المشروبات الساخنة">
+                </div>
+                <div>
+                  <label class="a-label">Icon image (optional)</label>
+                  <input type="file" id="new-cat-icon" accept="image/*" class="a-input">
+                </div>
+                <div style="display:flex;align-items:flex-end;">
+                  <button class="btn-sm" onclick="addCategory()" style="width:100%;padding:10px;">Add Category</button>
+                </div>
+              </div>
+            </div>
+            <div class="a-card">
+              <div class="a-card-title">Categories</div>
+              <div class="a-table-wrap">
+                <table class="a-table" id="categories-table">
+                  <thead><tr><th></th><th>Icon</th><th>Name EN</th><th>Name AR</th><th>Available</th><th></th></tr></thead>
+                  <tbody></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- TAB: ITEMS -->
+          <div class="admin-tab" id="tab-items">
+            <div class="a-card">
+              <div class="a-card-title">Add New Item</div>
+              <div class="form-grid form-grid-2">
+                <div>
+                  <label class="a-label">Category</label>
+                  <select id="new-item-cat" class="a-select"></select>
+                </div>
+                <div>
+                  <label class="a-label">Image</label>
+                  <input type="file" id="new-item-img" accept="image/*" class="a-input">
+                </div>
+                <div>
+                  <label class="a-label">Name (English)</label>
+                  <input type="text" id="new-item-name-en" class="a-input" placeholder="e.g. Cardamom Latte">
+                </div>
+                <div>
+                  <label class="a-label">Name (Arabic)</label>
+                  <input type="text" id="new-item-name-ar" class="a-input" dir="rtl" placeholder="مثال: لاتيه الهيل">
+                </div>
+                <div>
+                  <label class="a-label">Description (English)</label>
+                  <textarea id="new-item-desc-en" class="a-textarea" placeholder="Short description…"></textarea>
+                </div>
+                <div>
+                  <label class="a-label">Description (Arabic)</label>
+                  <textarea id="new-item-desc-ar" class="a-textarea" dir="rtl" placeholder="وصف قصير…"></textarea>
+                </div>
+                <div>
+                  <label class="a-label">Price (IQD)</label>
+                  <input type="number" id="new-item-price" class="a-input" placeholder="5000">
+                </div>
+                <div style="display:flex;align-items:flex-end;">
+                  <button class="btn-sm" onclick="addItem()" style="width:100%;padding:10px;">Add Item</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="a-card">
+              <div class="a-card-title">All Items <span>Click a row to edit details &amp; extras</span></div>
+              <div class="a-table-wrap">
+                <table class="a-table" id="items-table">
+                  <thead>
+                    <tr><th></th><th>Image</th><th>Name</th><th>Category</th><th>Price (IQD)</th><th>Available</th><th></th></tr>
+                  </thead>
+                  <tbody></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- TAB: DESIGN -->
+          <div class="admin-tab" id="tab-design">
+
+            <div class="a-card">
+              <div class="a-card-title">Logo</div>
+              <div style="display:flex;align-items:center;gap:18px;flex-wrap:wrap;">
+                <img src="/logo.png" id="logo-preview" style="height:64px;object-fit:contain;" onerror="this.style.opacity='.3'">
+                <label class="btn-sm" style="cursor:pointer;">
+                  Replace Logo (PNG/JPG)
+                  <input type="file" accept="image/*" style="display:none;" onchange="uploadLogo(this)">
+                </label>
+              </div>
+            </div>
+
+            <div class="a-card">
+              <div class="a-card-title">Color Palette</div>
+              <div class="color-swatch-row" id="color-swatch-row">
+                <div class="color-swatch">
+                  <input type="color" id="color-primary" value="#5c0d12" onchange="previewColor('--primary', this.value)">
+                  <label>Primary</label>
+                </div>
+                <div class="color-swatch">
+                  <input type="color" id="color-accent" value="#c8ac8f" onchange="previewColor('--accent', this.value)">
+                  <label>Accent</label>
+                </div>
+                <div class="color-swatch">
+                  <input type="color" id="color-bg" value="#f9f4ee" onchange="previewColor('--bg', this.value)">
+                  <label>Background</label>
+                </div>
+              </div>
+              <button class="btn-sm" style="margin-top:16px;" onclick="saveColors()">Save Colors</button>
+            </div>
+
+            <div class="a-card">
+              <div class="a-card-title">UI Icons <span>Replace any icon with your own PNG. Leave empty to use the built-in icon.</span></div>
+              <div class="icon-upload-grid" id="ui-icon-grid">
+                <!-- rendered by JS -->
+              </div>
+            </div>
+
+            <div class="a-card">
+              <div class="a-card-title">Sidebar Navigation Icons <span>Icons shown in the admin sidebar.</span></div>
+              <div class="icon-upload-grid" id="nav-icon-grid">
+                <!-- rendered by JS -->
+              </div>
+            </div>
+
+          </div>
+
+          <!-- TAB: COMMENTS -->
+          <div class="admin-tab" id="tab-comments">
+            <div class="a-card">
+              <div class="a-card-title">All Comments <span id="comments-count-label"></span></div>
+              <div id="comments-list"></div>
+            </div>
+          </div>
+
+        </div><!-- /admin-content -->
+      </div><!-- /admin-main -->
+    </div>
+  </div>
+</div>
+
+<script src="admin.js"></script>
+</body>
+</html>

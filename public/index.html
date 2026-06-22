@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" id="html-root">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Floranya</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400;500;600;700&family=Playfair+Display:wght@400;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header class="site-header">
+    <div class="header-inner">
+      <div class="header-logo">
+        <img src="/logo.png" alt="Floranya" class="logo-img" onerror="this.style.display='none'">
+        <span class="logo-wordmark">Floranya</span>
+      </div>
+      <div class="header-actions">
+        <button class="lang-btn" id="lang-btn" onclick="toggleLang()">عربي</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- HERO VIDEO -->
+  <section class="hero-video-wrap" id="hero-video-wrap" style="display:none;">
+    <video id="hero-video" autoplay muted loop playsinline></video>
+  </section>
+
+  <!-- FEATURED -->
+  <section class="featured-wrap" id="featured-wrap" style="display:none;">
+    <div class="section-heading">
+      <h2 class="t" data-en="Popular" data-ar="الأكثر طلباً">Popular</h2>
+    </div>
+    <div class="featured-scroll" id="featured-scroll"></div>
+  </section>
+
+  <!-- CATEGORY NAV -->
+  <nav class="cat-nav" id="cat-nav" aria-label="Menu categories"></nav>
+
+  <!-- MENU SECTIONS -->
+  <main class="menu-root" id="menu-root">
+    <p class="state-msg t" data-en="Loading menu…" data-ar="جاري التحميل…">Loading menu…</p>
+  </main>
+
+  <!-- ITEM MODAL -->
+  <div class="modal-overlay" id="modal-overlay">
+    <div class="modal-sheet" id="modal-sheet">
+      <div class="modal-header">
+        <div class="modal-drag-handle"></div>
+        <button class="modal-close" id="modal-close-btn" aria-label="Close">✕</button>
+      </div>
+      <div class="modal-body" id="modal-body"></div>
+    </div>
+  </div>
+
+  <footer class="site-footer">
+    <a href="/admin.html" class="footer-admin-link t" data-en="Admin Panel" data-ar="لوحة التحكم">Admin Panel</a>
+  </footer>
+
+  <script src="menu.js"></script>
+</body>
+</html>
