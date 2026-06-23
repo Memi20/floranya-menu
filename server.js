@@ -216,17 +216,17 @@ app.get('/api/items/:id/extras', requireAdmin, (req, res) => {
 });
 
 app.post('/api/items/:id/extras', requireAdmin, (req, res) => {
-  const { name, name_ar, price_addition, sort_order, conflict_group } = req.body;
+  const { name, name_ar, price_addition, sort_order, conflict_group, is_none_label } = req.body;
   if (!name?.trim()) return res.status(400).json({ error: 'Name required' });
-  const r = db.prepare('INSERT INTO extras (item_id,name,name_ar,price_addition,sort_order,conflict_group) VALUES (?,?,?,?,?,?)')
-    .run(req.params.id, name.trim(), name_ar||null, price_addition||0, sort_order||0, conflict_group||null);
+  const r = db.prepare('INSERT INTO extras (item_id,name,name_ar,price_addition,sort_order,conflict_group,is_none_label) VALUES (?,?,?,?,?,?,?)')
+    .run(req.params.id, name.trim(), name_ar||null, price_addition||0, sort_order||0, conflict_group||null, is_none_label?1:0);
   res.json({ id: r.lastInsertRowid });
 });
 
 app.put('/api/extras/:id', requireAdmin, (req, res) => {
-  const { name, name_ar, price_addition, sort_order, conflict_group } = req.body;
-  db.prepare('UPDATE extras SET name=?,name_ar=?,price_addition=?,sort_order=?,conflict_group=? WHERE id=?')
-    .run(name, name_ar||null, price_addition||0, sort_order||0, conflict_group||null, req.params.id);
+  const { name, name_ar, price_addition, sort_order, conflict_group, is_none_label } = req.body;
+  db.prepare('UPDATE extras SET name=?,name_ar=?,price_addition=?,sort_order=?,conflict_group=?,is_none_label=? WHERE id=?')
+    .run(name, name_ar||null, price_addition||0, sort_order||0, conflict_group||null, is_none_label?1:0, req.params.id);
   res.json({ ok: true });
 });
 

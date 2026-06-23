@@ -1,3 +1,6 @@
 node_modules/
 data/
 public/videos/
+.DS_Store
+public/.DS_Store
+

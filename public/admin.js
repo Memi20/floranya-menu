@@ -431,27 +431,29 @@ function renderExtrasEditor(extras, itemId) {
       <input class="a-input" dir="rtl" value="${esc(ex.name_ar||'')}" placeholder="الاسم"
              onchange="updateExtra(${ex.id},'name_ar',this.value)">
       <input type="number" class="a-input price-input" value="${ex.price_addition}" placeholder="+IQD"
+             ${ex.is_none_label ? 'disabled style="opacity:.4"' : ''}
              onchange="updateExtra(${ex.id},'price_addition',Number(this.value))">
       <button class="btn-sm danger" onclick="deleteExtra(${ex.id}, ${itemId})">✕</button>
     </div>`;
 
+  // Option groups first
   let html = `<div style="font-weight:600;font-size:.82rem;margin-bottom:8px;color:var(--ink-soft);">
-    ☑ ADD-ONS <span style="font-weight:400;">(customer can select multiple)</span></div>
-  <div class="extras-editor">${standalone.map(extraRow).join('')}</div>
-  <div class="extra-row" style="margin-bottom:16px;">
-    <input class="a-input" id="new-addon-en-${itemId}" placeholder="Name (EN)">
-    <input class="a-input" dir="rtl" id="new-addon-ar-${itemId}" placeholder="الاسم">
-    <input type="number" class="a-input price-input" id="new-addon-price-${itemId}" placeholder="+IQD">
-    <button class="btn-sm" onclick="addAddon(${itemId})">+ Add</button>
-  </div>`;
-
-  html += `<div style="font-weight:600;font-size:.82rem;margin-bottom:8px;color:var(--ink-soft);">
     ◉ OPTION GROUPS <span style="font-weight:400;">(customer picks one per group)</span></div>`;
 
   for (const [group, options] of Object.entries(groups)) {
+    const noneEntry = options.find(ex => ex.is_none_label);
+    const realOptions = options.filter(ex => !ex.is_none_label);
     html += `<div class="option-group-block">
       <div class="option-group-label">◉ ${esc(group)}</div>
-      ${options.map(extraRow).join('')}
+      ${noneEntry ? `<div class="extra-row" style="background:rgba(200,172,143,.12);border-radius:8px;padding:4px 6px;margin-bottom:4px;">
+        <span style="font-size:.72rem;color:var(--ink-soft);white-space:nowrap;flex-shrink:0;">Default label:</span>
+        <input class="a-input" value="${esc(noneEntry.name)}" placeholder="Label when nothing selected (e.g. Regular)"
+               onchange="updateExtra(${noneEntry.id},'name',this.value)">
+        <input class="a-input" dir="rtl" value="${esc(noneEntry.name_ar||'')}" placeholder="التسمية الافتراضية"
+               onchange="updateExtra(${noneEntry.id},'name_ar',this.value)">
+        <span style="width:80px;flex-shrink:0;font-size:.72rem;color:var(--ink-soft);">Free (0 IQD)</span>
+      </div>` : ''}
+      ${realOptions.map(extraRow).join('')}
       <div class="extra-row" style="margin-top:6px;" data-group="${esc(group)}" data-item="${itemId}">
         <input class="a-input new-opt-en" placeholder="Option (EN)">
         <input class="a-input new-opt-ar" dir="rtl" placeholder="الخيار">
@@ -461,9 +463,22 @@ function renderExtrasEditor(extras, itemId) {
     </div>`;
   }
 
-  html += `<div class="extra-row" style="margin-top:6px;">
-    <input class="a-input" id="new-group-name-${itemId}" placeholder="New group name (e.g. Milk Type)">
-    <button class="btn-sm secondary" onclick="addNewGroup(${itemId})">+ Add Option Group</button>
+  html += `<div class="extra-row" style="margin-top:6px;margin-bottom:20px;">
+    <input class="a-input" id="new-group-name-${itemId}" placeholder="Group name (e.g. Milk Type)">
+    <input class="a-input" id="new-group-none-en-${itemId}" placeholder="Default label (e.g. Regular Milk)">
+    <input class="a-input" dir="rtl" id="new-group-none-ar-${itemId}" placeholder="التسمية الافتراضية">
+    <button class="btn-sm secondary" onclick="addNewGroup(${itemId})">+ Add Group</button>
+  </div>`;
+
+  // Add-ons after groups
+  html += `<div style="font-weight:600;font-size:.82rem;margin-bottom:8px;color:var(--ink-soft);">
+    ☑ ADD-ONS <span style="font-weight:400;">(customer can select multiple)</span></div>
+  <div class="extras-editor">${standalone.map(extraRow).join('')}</div>
+  <div class="extra-row">
+    <input class="a-input" id="new-addon-en-${itemId}" placeholder="Name (EN)">
+    <input class="a-input" dir="rtl" id="new-addon-ar-${itemId}" placeholder="الاسم">
+    <input type="number" class="a-input price-input" id="new-addon-price-${itemId}" placeholder="+IQD">
+    <button class="btn-sm" onclick="addAddon(${itemId})">+ Add</button>
   </div>`;
 
   return html;
@@ -491,10 +506,12 @@ async function addOptionToGroup(groupName, itemId, btn) {
 }
 
 async function addNewGroup(itemId) {
-  const groupName = document.getElementById(`new-group-name-${itemId}`)?.value.trim();
+  const groupName  = document.getElementById(`new-group-name-${itemId}`)?.value.trim();
+  const noneLabel  = document.getElementById(`new-group-none-en-${itemId}`)?.value.trim() || 'None';
+  const noneLabelAr = document.getElementById(`new-group-none-ar-${itemId}`)?.value.trim() || '';
   if (!groupName) return alert('Group name is required.');
   await fetch(`/api/items/${itemId}/extras`, { method: 'POST', headers: ahj(),
-    body: JSON.stringify({ name: groupName, name_ar: '', price_addition: 0, conflict_group: groupName }) });
+    body: JSON.stringify({ name: noneLabel, name_ar: noneLabelAr, price_addition: 0, conflict_group: groupName, is_none_label: 1 }) });
   refreshMenu();
 }
 

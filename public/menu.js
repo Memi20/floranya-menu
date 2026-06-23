@@ -59,7 +59,7 @@ function toggleLang() {
 function applyLang() {
   const root = document.getElementById('html-root');
   root.lang = lang; root.dir = lang === 'ar' ? 'rtl' : 'ltr';
-  document.getElementById('lang-btn').textContent = lang === 'en' ? 'عربي' : 'English';
+  document.getElementById('lang-btn').textContent = lang === 'en' ? 'Arabic' : 'English';
   document.querySelectorAll('[data-en][data-ar]').forEach(el => { el.textContent = el.dataset[lang]; });
 }
 
@@ -88,8 +88,13 @@ async function loadHeroVideo() {
     if (!filename) return;
     const wrap  = document.getElementById('hero-video-wrap');
     const video = document.getElementById('hero-video');
+    video.setAttribute('playsinline', '');
+    video.setAttribute('muted', '');
+    video.muted = true;
     video.src = `/videos/${esc(filename)}`;
     wrap.style.display = 'block';
+    video.load();
+    video.play().catch(() => {});
   } catch {}
 }
 
@@ -190,17 +195,21 @@ function renderCard(item, likedItems) {
         <img src="/images/${esc(img)}" alt="${esc(itemName(item))}" loading="lazy"
              onerror="this.src='/images/placeholder.svg'">
       </div>
+      <!-- Name + price overlaid at the top -->
+      <div class="item-card-name-bar">
+        <div class="item-name">${esc(itemName(item))}</div>
+        <div class="item-name-price">${fmtPrice(item.price)}</div>
+      </div>
       <button class="item-like-btn ${liked?'liked':''}"
               onclick="event.stopPropagation(); toggleItemLike(${item.id}, this)"
               aria-label="Like">
         ${icon(liked ? 'like_filled' : 'like_outline')}
       </button>
+      <!-- Description box at bottom -->
       <div class="item-card-body">
-        <div class="item-name">${esc(itemName(item))}</div>
         ${desc ? `<div class="item-desc">${esc(desc)}</div>` : ''}
         ${!item.available ? `<span class="unavail-tag">${lang==='ar'?'غير متوفر':'Unavailable'}</span>` : ''}
         <div class="item-card-footer">
-          <span class="item-price">${fmtPrice(item.price)}</span>
           <div class="item-stats">
             <span class="item-stat">${icon('like_outline')} <span id="likes-count-${item.id}">${item.likes_count||0}</span></span>
             <span class="item-stat">${icon('comment')} ${item.comment_count||0}</span>
@@ -316,22 +325,11 @@ function renderExtrasSection(item) {
 
   let html = '';
 
-  if (standalone.length) {
-    html += `<div class="extras-section">
-      <div class="extras-title">${lang==='ar'?'الإضافات':'Add-ons'}</div>
-      ${standalone.map(ex => `
-        <div class="extra-item">
-          <label class="extra-label">
-            <input type="checkbox" data-price="${ex.price_addition}"
-                   onchange="recalcPrice(${item.price})">
-            <span class="extra-name">${esc(extraName(ex))}</span>
-          </label>
-          <span class="extra-price-add">+ ${fmtPrice(ex.price_addition)}</span>
-        </div>`).join('')}
-    </div>`;
-  }
-
+  // Option groups first
   for (const [group, options] of Object.entries(groups)) {
+    const noneEntry   = options.find(ex => ex.is_none_label);
+    const realOptions = options.filter(ex => !ex.is_none_label);
+    const noneLabel   = noneEntry ? extraName(noneEntry) : (lang==='ar'?'بدون إضافة':'None');
     html += `<div class="extras-section">
       <div class="extras-title">
         <span class="extras-group-header">${esc(group)}</span>
@@ -340,15 +338,31 @@ function renderExtrasSection(item) {
         <label class="extra-label">
           <input type="radio" name="xg-${item.id}-${esc(group)}" value=""
                  checked onchange="recalcPrice(${item.price})">
-          <span class="extra-name">${lang==='ar'?'بدون إضافة':'None'}</span>
+          <span class="extra-name">${esc(noneLabel)}</span>
         </label>
         <span class="extra-price-add"></span>
       </div>
-      ${options.map(ex => `
+      ${realOptions.map(ex => `
         <div class="extra-item">
           <label class="extra-label">
             <input type="radio" name="xg-${item.id}-${esc(group)}"
                    value="${ex.price_addition}" data-price="${ex.price_addition}"
+                   onchange="recalcPrice(${item.price})">
+            <span class="extra-name">${esc(extraName(ex))}</span>
+          </label>
+          <span class="extra-price-add">+ ${fmtPrice(ex.price_addition)}</span>
+        </div>`).join('')}
+    </div>`;
+  }
+
+  // Add-ons after groups
+  if (standalone.length) {
+    html += `<div class="extras-section">
+      <div class="extras-title">${lang==='ar'?'الإضافات':'Add-ons'}</div>
+      ${standalone.map(ex => `
+        <div class="extra-item">
+          <label class="extra-label">
+            <input type="checkbox" data-price="${ex.price_addition}"
                    onchange="recalcPrice(${item.price})">
             <span class="extra-name">${esc(extraName(ex))}</span>
           </label>

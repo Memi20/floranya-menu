@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Floranya</title>
+<link rel="icon" type="image/png" href="/logo.png">
+<link rel="apple-touch-icon" href="/logo.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Arabic:wght@400;500;600;700&family=Playfair+Display:wght@400;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
@@ -18,14 +20,14 @@
         <span class="logo-wordmark">Floranya</span>
       </div>
       <div class="header-actions">
-        <button class="lang-btn" id="lang-btn" onclick="toggleLang()">عربي</button>
+        <button class="lang-btn" id="lang-btn" onclick="toggleLang()">Arabic</button>
       </div>
     </div>
   </header>
 
   <!-- HERO VIDEO -->
   <section class="hero-video-wrap" id="hero-video-wrap" style="display:none;">
-    <video id="hero-video" autoplay muted loop playsinline></video>
+    <video id="hero-video" autoplay muted loop playsinline webkit-playsinline x5-playsinline></video>
   </section>
 
   <!-- FEATURED -->
@@ -37,7 +39,9 @@
   </section>
 
   <!-- CATEGORY NAV -->
-  <nav class="cat-nav" id="cat-nav" aria-label="Menu categories"></nav>
+  <div class="cat-nav-wrap">
+    <nav class="cat-nav" id="cat-nav" aria-label="Menu categories"></nav>
+  </div>
 
   <!-- MENU SECTIONS -->
   <main class="menu-root" id="menu-root">

@@ -91,6 +91,7 @@ migrate('ALTER TABLE items ADD COLUMN description TEXT');
 migrate('ALTER TABLE items ADD COLUMN description_ar TEXT');
 migrate('ALTER TABLE items ADD COLUMN likes_count INTEGER NOT NULL DEFAULT 0');
 migrate('ALTER TABLE extras ADD COLUMN conflict_group TEXT');
+migrate('ALTER TABLE extras ADD COLUMN is_none_label INTEGER NOT NULL DEFAULT 0');
 migrate("UPDATE items SET description = ingredients WHERE description IS NULL AND ingredients IS NOT NULL AND ingredients != ''");
 
 const insertSetting = db.prepare('INSERT OR IGNORE INTO settings (key, value) VALUES (?, ?)');
