@@ -6,7 +6,18 @@ const db      = require('./db');
 
 const app  = express();
 const PORT = process.env.PORT || 3000;
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'floranya123';
+
+// Require ADMIN_PASSWORD env var in production; generate a random one locally so the
+// server still starts during development without a .env file.
+let ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
+if (!ADMIN_PASSWORD) {
+  if (process.env.NODE_ENV === 'production') {
+    console.error('ERROR: ADMIN_PASSWORD environment variable is required in production. Set it in Railway variables and redeploy.');
+    process.exit(1);
+  }
+  ADMIN_PASSWORD = Math.random().toString(36).slice(2) + Math.random().toString(36).slice(2);
+  console.warn(`\n⚠  No ADMIN_PASSWORD set — using random password for this session: ${ADMIN_PASSWORD}\n   Set ADMIN_PASSWORD environment variable to use a fixed password.\n`);
+}
 
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
