@@ -117,7 +117,7 @@ insertSetting.run('icon_nav_categories', '');
 insertSetting.run('icon_nav_items', '');
 insertSetting.run('icon_nav_comments', '');
 // Hero video
-insertSetting.run('hero_video_filename', '');
+insertSetting.run('hero_video_filename', 'hero.mov');
 
 const count = db.prepare('SELECT COUNT(*) as c FROM categories').get().c;
 if (count === 0) {
