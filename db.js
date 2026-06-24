@@ -121,46 +121,7 @@ insertSetting.run('hero_video_filename', '');
 
 const count = db.prepare('SELECT COUNT(*) as c FROM categories').get().c;
 if (count === 0) {
-  const insertCat  = db.prepare('INSERT INTO categories (name, name_ar, sort_order) VALUES (?, ?, ?)');
-  const insertItem = db.prepare(`
-    INSERT INTO items (category_id, name, name_ar, description, description_ar, price, image_filename, sort_order)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-  `);
-  const insertExtra = db.prepare('INSERT INTO extras (item_id, name, name_ar, price_addition, conflict_group) VALUES (?, ?, ?, ?, ?)');
-
-  const coffeeId = insertCat.run('Coffee', 'القهوة', 1).lastInsertRowid;
-  const cakesId  = insertCat.run('Cakes',  'الكيك',  2).lastInsertRowid;
-  const coldId   = insertCat.run('Cold Drinks', 'المشروبات الباردة', 3).lastInsertRowid;
-
-  const c1 = insertItem.run(coffeeId, 'Cardamom Latte', 'لاتيه الهيل',
-    'Espresso with steamed milk and a hint of cardamom',
-    'إسبريسو مع حليب مبخر ولمسة هيل', 4500, 'placeholder.svg', 1).lastInsertRowid;
-  const c2 = insertItem.run(coffeeId, 'Rose Latte', 'لاتيه الورد',
-    'Creamy latte infused with rose water',
-    'لاتيه كريمي بماء الورد', 5000, 'placeholder.svg', 2).lastInsertRowid;
-  const k1 = insertItem.run(cakesId, 'Pistachio Cake', 'كيكة الفستق',
-    'Soft pistachio sponge with rosewater cream',
-    'إسفنج فستق ناعم مع كريمة ماء الورد', 6500, 'placeholder.svg', 1).lastInsertRowid;
-  insertItem.run(cakesId, 'Lotus Cheesecake', 'تشيزكيك لوتس',
-    'Classic cheesecake topped with Lotus Biscoff',
-    'تشيزكيك كلاسيكي مع لوتس بسكوف', 7000, 'placeholder.svg', 2);
-  const d1 = insertItem.run(coldId, 'Iced Matcha', 'ماتشا باردة',
-    'Japanese matcha over ice with oat milk',
-    'ماتشا يابانية على الثلج مع حليب الشوفان', 5500, 'placeholder.svg', 1).lastInsertRowid;
-
-  // milk_type conflict group: only one can be selected
-  insertExtra.run(c1, 'Extra shot', 'شوت إضافي', 500, null);
-  insertExtra.run(c1, 'Oat milk', 'حليب الشوفان', 500, 'milk_type');
-  insertExtra.run(c1, 'Coconut milk', 'حليب جوز الهند', 500, 'milk_type');
-  insertExtra.run(c1, 'Vanilla syrup', 'شراب الفانيليا', 250, null);
-  insertExtra.run(c2, 'Extra shot', 'شوت إضافي', 500, null);
-  insertExtra.run(c2, 'Extra rose', 'ورد إضافي', 250, null);
-  insertExtra.run(d1, 'Extra matcha', 'ماتشا إضافية', 500, null);
-  insertExtra.run(d1, 'Oat milk', 'حليب الشوفان', 500, 'milk_type');
-  insertExtra.run(d1, 'Coconut milk', 'حليب جوز الهند', 500, 'milk_type');
-  insertExtra.run(k1, 'Extra cream', 'كريمة إضافية', 500, null);
-
-  console.log('Seeded demo data.');
+  require('./seed-default')(db);
 }
 
 module.exports = db;

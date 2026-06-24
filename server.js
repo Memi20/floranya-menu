@@ -147,12 +147,12 @@ app.post('/api/comments/:id/like', (req, res) => {
   if (existing) {
     db.prepare('DELETE FROM comment_likes WHERE comment_id=? AND device_id=?').run(req.params.id, device_id);
     db.prepare('UPDATE comments SET likes_count=MAX(0,likes_count-1) WHERE id=?').run(req.params.id);
-    res.json({ liked: false });
   } else {
     db.prepare('INSERT INTO comment_likes (comment_id, device_id) VALUES (?,?)').run(req.params.id, device_id);
     db.prepare('UPDATE comments SET likes_count=likes_count+1 WHERE id=?').run(req.params.id);
-    res.json({ liked: true });
   }
+  const likes_count = db.prepare('SELECT likes_count FROM comments WHERE id=?').get(req.params.id)?.likes_count ?? 0;
+  res.json({ liked: !existing, likes_count });
 });
 
 // ===================== ADMIN =====================

@@ -227,20 +227,34 @@ function scrollToCat(id, btn) {
 
 /* ===================== ITEM LIKE (CARD) ===================== */
 async function toggleItemLike(itemId, btn) {
-  const liked = getLikedItems();
-  const was   = liked.has(itemId);
-  was ? liked.delete(itemId) : liked.add(itemId);
-  saveLikedItems(liked);
-  btn.innerHTML = icon(was ? 'like_outline' : 'like_filled');
-  btn.classList.toggle('liked', !was);
   try {
     const data = await fetch(`/api/items/${itemId}/like`, {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ device_id: getDeviceId() })
     }).then(r => r.json());
-    const el = document.getElementById(`likes-count-${itemId}`);
-    if (el) el.textContent = data.likes_count;
+    // Server is source of truth
+    const nowLiked = data.liked;
+    const liked = getLikedItems();
+    nowLiked ? liked.add(itemId) : liked.delete(itemId);
+    saveLikedItems(liked);
+    // Update card button
+    btn.innerHTML = icon(nowLiked ? 'like_filled' : 'like_outline');
+    btn.classList.toggle('liked', nowLiked);
+    const countEl = document.getElementById(`likes-count-${itemId}`);
+    if (countEl) countEl.textContent = data.likes_count;
+    // Keep modal in sync if it's open for this item
+    syncModalLikeBtn(itemId, nowLiked, data.likes_count);
   } catch {}
+}
+
+function syncModalLikeBtn(itemId, nowLiked, count) {
+  if (currentItemId !== itemId) return;
+  const btn = document.getElementById('modal-like-btn');
+  if (btn) {
+    btn.innerHTML = icon(nowLiked ? 'like_filled' : 'like_outline')
+      + `<span id="modal-likes-count">${count ?? ''}</span>`;
+    btn.classList.toggle('liked', nowLiked);
+  }
 }
 
 /* ===================== MODAL ===================== */
@@ -408,46 +422,47 @@ function renderComment(c, likedComments) {
 
 /* ===================== MODAL LIKE ===================== */
 async function toggleModalLike(itemId) {
-  const liked = getLikedItems();
-  const was   = liked.has(itemId);
-  was ? liked.delete(itemId) : liked.add(itemId);
-  saveLikedItems(liked);
-  const btn = document.getElementById('modal-like-btn');
-  if (btn) { btn.classList.toggle('liked', !was); btn.querySelector('svg, img').outerHTML; }
   try {
     const data = await fetch(`/api/items/${itemId}/like`, {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ device_id: getDeviceId() })
     }).then(r => r.json());
-    const countEl = document.getElementById('modal-likes-count');
-    if (countEl) countEl.textContent = data.likes_count;
+    const nowLiked = data.liked;
+    const liked = getLikedItems();
+    nowLiked ? liked.add(itemId) : liked.delete(itemId);
+    saveLikedItems(liked);
+    // Update modal button
+    const btn = document.getElementById('modal-like-btn');
+    if (btn) {
+      btn.innerHTML = icon(nowLiked ? 'like_filled' : 'like_outline')
+        + `<span id="modal-likes-count">${data.likes_count}</span>`;
+      btn.classList.toggle('liked', nowLiked);
+    }
+    // Keep card in sync
     const cardCountEl = document.getElementById(`likes-count-${itemId}`);
     if (cardCountEl) cardCountEl.textContent = data.likes_count;
-    // Refresh modal like button icon
-    if (btn) {
-      const iconEl = btn.querySelector('svg, img');
-      if (iconEl) iconEl.outerHTML = icon(data.liked ? 'like_filled' : 'like_outline');
+    const cardBtn = document.querySelector(`.item-card [onclick*="toggleItemLike(${itemId},"]`);
+    if (cardBtn) {
+      cardBtn.innerHTML = icon(nowLiked ? 'like_filled' : 'like_outline');
+      cardBtn.classList.toggle('liked', nowLiked);
     }
   } catch {}
 }
 
 /* ===================== COMMENT LIKE ===================== */
 async function toggleCommentLike(commentId, btn) {
-  const liked = getLikedComments();
-  const was   = liked.has(commentId);
-  was ? liked.delete(commentId) : liked.add(commentId);
-  saveLikedComments(liked);
-  btn.classList.toggle('liked', !was);
   try {
     const data = await fetch(`/api/comments/${commentId}/like`, {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ device_id: getDeviceId() })
     }).then(r => r.json());
+    const nowLiked = data.liked;
+    const liked = getLikedComments();
+    nowLiked ? liked.add(commentId) : liked.delete(commentId);
+    saveLikedComments(liked);
+    btn.classList.toggle('liked', nowLiked);
     const span = btn.querySelector('span');
-    if (span) span.textContent = data.liked
-      ? (Number(span.textContent) + (was ? 0 : 1))
-      : Math.max(0, Number(span.textContent) - (was ? 1 : 0));
-    btn.classList.toggle('liked', data.liked);
+    if (span) span.textContent = data.likes_count;
   } catch {}
 }
 
